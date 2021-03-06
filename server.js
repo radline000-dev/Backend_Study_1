@@ -7,6 +7,7 @@ const errorHandler = require("./middleware/error");
 const colors = require("colors");
 const connectDB = require("./config/db");
 const ErrorResponse = require("./utils/ErrorResponse");
+const fileuplaod = require("express-fileupload");
 
 // Settings models import
 const user = require("./routes/user");
@@ -19,9 +20,12 @@ connectDB();
 
 //express 생성
 const app = express();
+//정적 폴더 셋팅
+app.use(express.static(path.join(__dirname, "public")));
 
 //json를 읽을 수 있게
 app.use(express.json());
+app.use(fileuplaod());
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));

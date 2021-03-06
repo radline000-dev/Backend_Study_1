@@ -1,8 +1,8 @@
 const ErrorResponse = require("../utils/ErrorResponse");
 const asyncHandler = require("../middleware/async");
-
-// Working Cafe Base CRUD Contoller
-/** User Model Import */
+const path = require("path");
+// Clear Cafe Base CRUD Contoller
+/** Cafe Model Import */
 const { Cafe } = require("../models/Cafe");
 
 // @desc    모든 카페 조회
@@ -41,84 +41,83 @@ exports.getCafe = asyncHandler(async (req, res, next) => {
 // @route   POST /api/cafe/
 // @access  Private // Admin
 exports.createCafe = asyncHandler(async (req, res, next) => {
-  const { title, content, isLive, tag } = req.body;
-
-  const cafe = await Cafe.create({ username, email, password });
-
-  if (!cafe) {
-    return next(new ErrorResponse("User Not Create ", 400));
+  let { title, content, isLive, tag, user_id, images } = req.body;
+  tag = JSON.parse(tag);
+  const user = await User.findById(user_id);
+  if (!user) {
+    return next(new ErrorResponse(`${user_id} is Not User _id `, 400));
   }
-  // const cafe = new User({username,email,password});
-  // await cafe.save();
 
-  return res.status(200).json({
+  //Create
+  console.log(req.files.file);
+  //Tesing images => file 파일 images
+  if (req.files) {
+    const file = req.files.file; //(Multer single)
+    if (!file.mimetype.startsWith("image")) {
+      return next(new ErrorResponse("File must be images", 400));
+    }
+    if (file.size > process.env.MAX_FILE_UPLOAD) {
+      return next(
+        new ErrorResponse(`image less than ${process.env.MAX_FILE_UPLOAD}`, 400)
+      );
+    }
+    images = `cafe_image_${Date.now()}_${user_id}${path.parse(file.name).ext}`;
+  }
+
+  const createData = {
+    title,
+    content,
+    isLive,
+    tag,
+    user: user._id,
+    images,
+  };
+
+  let cafe = await Cafe.create(createData);
+
+  if (cafe && req.files) {
+    const file = req.files.file;
+    file.mv(`${process.env.FILE_UPLOAD_PATH}/${images}`, async (error) => {
+      if (error) {
+        //images 업데이트 로직이 필요
+        cafe.images = "";
+        await cafe.save();
+        return next(`Problem with file upload `, 500);
+      }
+    });
+  }
+
+  res.status(201).json({
     success: true,
     cafe,
   });
 });
 
 // @desc    카페 갱신
-// @route   Put /api/cafe/:user_id
+// @route   patch /api/cafe/:cafe_id
 // @access  Private / Admin
-exports.updateUser = asyncHandler(async (req, res, next) => {
-  const { user_id } = req.params;
-  const { username, password } = req.body;
-
-  let updateData = {};
-  if (!username && !password) {
-    return next(
-      new ErrorResponse("User Name is require or password required ", 400)
-    );
+exports.updateCafe = asyncHandler(async (req, res, next) => {
+  const { cafe_id } = req.params;
+  const cafe = await Cafe.findById(cafe_id);
+  if (!cafe) {
+    return next(new ErrorResponse("Cafe Data Not found ", 404));
   }
+  cafe.isLive = !cafe.isLive;
+  await cafe.save();
 
-  if (
-    (username && typeof username.first !== "string") ||
-    typeof username.last !== "string"
-  ) {
-    return next(
-      new ErrorResponse(
-        "User Name is require and username.fist must be string ,last must be string ",
-        400
-      )
-    );
-  }
-
-  if (password && typeof password !== "string") {
-    return next(
-      new ErrorResponse("Password is require and password = string ", 400)
-    );
-  }
-  if (password) {
-    updateData.password = password;
-  }
-  if (username) {
-    updateData.username = username;
-  }
-
-  const cafe = await User.findByIdAndUpdate(
-    { _id: user_id },
-    { updateData },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
-
-  return res.status(200).json({
+  res.status(200).json({
     success: true,
-    cafe,
   });
 });
 
 // @desc    카페 삭제
-// @route   Delete /api/cafe/:user_id
+// @route   Delete /api/cafe/:cafe_id
 // @access  Private // Admin
-exports.deleteUser = asyncHandler(async (req, res, next) => {
-  const { user_id } = req.params;
+exports.deleteCafe = asyncHandler(async (req, res, next) => {
+  const { cafe_id } = req.params;
+  await Cafe.findByIdAndDelete(cafe_id);
 
-  await User.findByIdAndDelete({ _id: user_id });
-
-  return res.status(200).json({
+  res.status(200).json({
     success: true,
   });
 });

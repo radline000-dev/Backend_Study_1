@@ -1,7 +1,33 @@
 const mongoose = require("mongoose");
 
-// Working Comment Models Define
-const CommentSchema = new mongoose.Schema({}, { timestamps });
+// Clear Comment Models Define
+const CommentSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: "user",
+      required: [true, "user_id is require"],
+    },
+    content: {
+      type: String,
+      minlength: [10, "content more than 10 length"],
+      maxlength: [100, "content length < 100 !! not "],
+      required: [true, "content is require"],
+    },
+    rating: {
+      type: Number,
+      min: 1,
+      max: 10,
+      required: [true, "Plase add a rating between 1 and 10"],
+    },
+    cafe: {
+      type: mongoose.Schema.ObjectId,
+      ref: "cafe",
+      required: [true, "Plase add a cafe _id "],
+    },
+  },
+  { timestamps }
+);
 
 const Comment = mongoose.model("comment", CommentSchema);
 module.exports = { Comment, CommentSchema };

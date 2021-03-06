@@ -10,12 +10,11 @@ const { User } = require("../models/User");
 // @access  Public
 exports.getUsers = asyncHandler(async (req, res, next) => {
   const users = await User.find();
-  const check = {};
-  console.log(!users.length);
+
   if (!users.length) {
     return next(new ErrorResponse("Users Data Not found", 404));
   }
-  return res.status(200).json({
+  res.status(200).json({
     success: true,
     users,
   });
@@ -32,7 +31,7 @@ exports.getUser = asyncHandler(async (req, res, next) => {
   if (!user) {
     return next(new ErrorResponse("User Data Not found ", 404));
   }
-  return res.status(200).json({
+  res.status(200).json({
     success: true,
     user,
   });
@@ -46,9 +45,6 @@ exports.createUser = asyncHandler(async (req, res, next) => {
 
   const user = await User.create({ username, email, password });
 
-  if (!user) {
-    return next(new ErrorResponse("User Not Create ", 400));
-  }
   // const user = new User({username,email,password});
   // await user.save();
 
