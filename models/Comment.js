@@ -11,7 +11,6 @@ const CommentSchema = new mongoose.Schema(
     content: {
       type: String,
       minlength: [10, "content more than 10 length"],
-      maxlength: [100, "content length < 100 !! not "],
       required: [true, "content is require"],
     },
     rating: {
@@ -26,7 +25,7 @@ const CommentSchema = new mongoose.Schema(
       required: [true, "Plase add a cafe _id "],
     },
   },
-  { timestamps }
+  { timestamps: true }
 );
 
 const Comment = mongoose.model("comment", CommentSchema);

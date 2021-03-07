@@ -15,6 +15,7 @@ const cafe = require("./routes/cafe");
 
 // 환경 변수 로드
 dotenv.config({ path: "./config/config.env" });
+
 //Data Base  Connect
 connectDB();
 

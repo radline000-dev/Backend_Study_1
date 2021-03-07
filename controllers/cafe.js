@@ -4,19 +4,19 @@ const path = require("path");
 // Clear Cafe Base CRUD Contoller
 /** Cafe Model Import */
 const { Cafe } = require("../models/Cafe");
-
+const { User } = require("../models/User");
 // @desc    모든 카페 조회
 // @route   GET /api/cafe/
 // @access  Public
 exports.getCafes = asyncHandler(async (req, res, next) => {
-  const cafes = await Cafe.find();
+  const cafe = await Cafe.find();
 
-  if (!cafes.length) {
+  if (!cafe.length) {
     return next(new ErrorResponse("Cafes Data Not found ", 404));
   }
   return res.status(200).json({
     success: true,
-    Cafes,
+    data: cafe,
   });
 });
 
@@ -42,8 +42,11 @@ exports.getCafe = asyncHandler(async (req, res, next) => {
 // @access  Private // Admin
 exports.createCafe = asyncHandler(async (req, res, next) => {
   let { title, content, isLive, tag, user_id, images } = req.body;
+
   tag = JSON.parse(tag);
+  console.log(user_id);
   const user = await User.findById(user_id);
+  console.log(user);
   if (!user) {
     return next(new ErrorResponse(`${user_id} is Not User _id `, 400));
   }
@@ -89,7 +92,7 @@ exports.createCafe = asyncHandler(async (req, res, next) => {
 
   res.status(201).json({
     success: true,
-    cafe,
+    data: cafe,
   });
 });
 

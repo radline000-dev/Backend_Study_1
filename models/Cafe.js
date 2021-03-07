@@ -22,8 +22,9 @@ const CafeSchema = new mongoose.Schema(
     },
     averageRating: {
       type: Number,
-      min: [1, "Rating must be at least 1"],
+      min: [0, "Rating must be at least 1"],
       max: [10, "Rating must can not be more than 10"],
+      default: 0.0,
     },
     user: {
       type: mongoose.Schema.ObjectId,
